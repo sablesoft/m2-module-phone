@@ -12,24 +12,18 @@
                    showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>General</label>
                 <comment>This is configuration page for Phone Integration module.</comment>
-                <field id="phone_label" translate="label comment" type="text"
-                       sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Phone Label</label>
-                    <comment>Phone frontend label text.</comment>
-                    <validate>required-entry validate-data</validate>
-                </field>
                 <field id="auth" translate="label comment" type="select"
-                       sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                       sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Authorization Mode</label>
                     <source_model>SableSoft\Phone\Model\Config\Source\AuthMode</source_model>
                 </field>
                 <field id="reg" translate="label comment" type="select"
-                       sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                       sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Registration Mode</label>
                     <source_model>SableSoft\Phone\Model\Config\Source\RegMode</source_model>
                 </field>
                 <field id="code_length" translate="label comment" type="text"
-                       sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                       sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Code Length</label>
                     <comment>SMS code length - must be between 4 - 8</comment>
                     <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-4-8</validate>
@@ -52,7 +46,7 @@
                     <comment>SMS code valid period in seconds</comment>
                     <validate>required-entry validate-not-negative-number</validate>
                 </field>
-                <field id="is_develop" translate="label comment" type="select" sortOrder="140"
+                <field id="is_develop" translate="label comment" type="select" sortOrder="100"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Develop Mode</label>
                     <comment>Developer mode flag. Don't use in production!</comment>

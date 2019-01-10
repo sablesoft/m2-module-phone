@@ -3,7 +3,10 @@ namespace SableSoft\Phone\Helper;
 
 use SableSoft\Phone\Model\Config;
 use SableSoft\Phone\Model\Config\Source\AuthMode;
+use SableSoft\Phone\Model\Config\Source\RegMode;
 use SableSoft\Core\Helper\Data as CoreHelper;
+use Magento\Eav\Model\Entity\Attribute;
+use Magento\Customer\Model\Customer;
 
 /**
  * Class Data
@@ -18,20 +21,22 @@ class Data extends CoreHelper {
      * Retrieve the email field config
      *
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getEmailFieldConfig() :array {
+    public function getUsernameFieldConfig() :array {
+        $attribute = $this->getPhoneAttribute();
         /** @var Config $config */
         $config = $this->getConfig();
         switch( $config->getValue('auth' ) ) {
             case AuthMode::MODE_CODE:
             case AuthMode::MODE_PHONE:
-                $label = $config->getValue('phone_label');
-                $type = 'text';
+                $label = __( $attribute->getData('frontend_label') );
+                $type = 'tel';
                 $dataValidate = "{required:true}";
                 break;
             case AuthMode::MODE_BOTH:
                 $label = __( 'Email' ) . ' / ' .
-                    $config->getValue('phone_label');
+                    __( $attribute->getData('frontend_label' ) );
                 $type = 'text';
                 $dataValidate = "{required:true}";
                 break;
@@ -72,6 +77,13 @@ class Data extends CoreHelper {
     }
 
     /**
+     * @return bool
+     */
+    public function isCodeRegMode() : bool {
+        return RegMode::MODE_CODE == $this->getConfigValue('reg');
+    }
+
+    /**
      * @return string
      */
     public function getCodeSendUrl() : string {
@@ -79,5 +91,21 @@ class Data extends CoreHelper {
         $config = $this->getConfig();
 
         return $this->_urlBuilder->getUrl( $config::ROUTE_PHONE_CODE_SEND );
+    }
+
+    /**
+     * @return Attribute
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getPhoneAttribute() : Attribute {
+        return $this->getAttribute( Customer::ENTITY, Config::ATTRIBUTE_PHONE );
+    }
+
+    /**
+     * @return string
+     */
+    public function getPhonePlaceholder() : string {
+        $code = $this->getConfigValue( 'country', 'smsp' );
+        return "+$code (__) ___-__-__";
     }
 }
