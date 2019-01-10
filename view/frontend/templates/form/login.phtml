@@ -4,7 +4,6 @@
 /** @var \Magento\Customer\Block\Form\Login $block */
 /** @var SableSoft\Phone\Helper\Data $helper */
 $helper = $this->helper('SableSoft\Phone\Helper\Data');
-$emailConfig = $helper->getEmailFieldConfig();
 $isCodeMode = $helper->isCodeAuthMode();
 $codeUrl = $helper->getCodeSendUrl();
 ?>
@@ -16,6 +15,7 @@ $codeUrl = $helper->getCodeSendUrl();
  * @var $block \Magento\Customer\Block\Form\Login
  */
 try {
+$usernameConfig = $helper->getUsernameFieldConfig();
 ?>
 <div class="block block-customer-login">
     <div class="block-title">
@@ -29,18 +29,24 @@ try {
               data-mage-init='{"validation":{}}'>
             <?= $block->getBlockHtml('formkey'); ?>
             <fieldset class="fieldset login" data-hasrequired="<?php /* @escapeNotVerified */ echo __('* Required Fields') ?>">
-                <div class="field note"><?php /* @escapeNotVerified */ echo $helper->getLoginNote(); ?></div>
+                <div class="field note">
+                    <?php /* @escapeNotVerified */ echo $helper->getLoginNote(); ?>
+                </div>
                 <div class="field email required">
-                    <label class="label" for="email"><span><?php /* @escapeNotVerified */ echo __($emailConfig['label']) ?></span></label>
+                    <label class="label" for="email">
+                        <span><?php /* @escapeNotVerified */ echo __($usernameConfig['label']) ?></span>
+                    </label>
                     <div class="control">
-                        <input name="login[username]" value="<?= $block->escapeHtml($block->getUsername()) ?>" <?php if ($block->isAutocompleteDisabled()) :?> autocomplete="off"<?php endif; ?>
-                               id="email" type="<?php echo $emailConfig['type']?>" class="input-text"
-                               title="<?php /* @escapeNotVerified */ echo __($emailConfig['label']) ?>"
-                               data-validate="<?php echo $emailConfig['data_validate']?>">
+                        <input name="login[username]" value="<?= $block->escapeHtml( $block->getUsername() ); ?>"
+                            <?php if( $block->isAutocompleteDisabled() ) :?> autocomplete="off"<?php endif; ?>
+                               id="email" type="<?php echo $usernameConfig['type']?>" class="input-text"
+                               title="<?php /* @escapeNotVerified */ echo __( $usernameConfig['label'] ); ?>"
+                               <?php if( $isCodeMode ) { ?> placeholder="<?= $helper->getPhonePlaceholder(); ?>" <?php } ?>
+                               data-validate="<?= $usernameConfig['data_validate']; ?>">
                     </div>
                 </div>
-            <?php if( $isCodeMode ) { ?>
                 <div class="field password required">
+                <?php if( $isCodeMode ) { ?>
                     <label for="pass" class="label" style="padding-top: 0;">
                         <button type="button" class="btn btn-info" id="send_code">
                             <?php /* @escapeNotVerified */ echo __('Send Code'); ?>
@@ -52,19 +58,18 @@ try {
                                title="<?php /* @escapeNotVerified */ echo __('Phone Code'); ?>"
                                data-validate="{required:true}">
                     </div>
-                </div>
-                <script type="text/x-magento-init">
-                    { "#send_code": {
-                        "SableSoft_Phone/js/sendCode": {
-                                "url":"<?= $codeUrl; ?>",
-                                "freezeTime"  : <?= $helper->getConfigValue('code_freeze' ) * 1000; ?>,
-                                "countryCode" : "<?= $helper->getConfigValue('country', 'smsp' ); ?>"
+                    <script type="text/x-magento-init">
+                        { "#send_code": {
+                            "SableSoft_Phone/js/sendCode": {
+                                    "url":"<?= $codeUrl; ?>",
+                                    "selector" : "#email",
+                                    "freezeTime"  : <?= $helper->getConfigValue('code_freeze' ) * 1000; ?>,
+                                    "countryCode" : "<?= $helper->getConfigValue('country', 'smsp' ); ?>"
+                                }
                             }
                         }
-                    }
-                </script>
-            <?php } else { ?>
-                <div class="field password required">
+                    </script>
+                <?php } else { ?>
                     <label for="pass" class="label">
                         <span><?php /* @escapeNotVerified */ echo __('Password'); ?></span>
                     </label>
@@ -75,8 +80,8 @@ try {
                                title="<?php /* @escapeNotVerified */ echo __('Password') ?>"
                                data-validate="{required:true, 'validate-password':true}">
                     </div>
+                <?php } ?>
                 </div>
-            <?php } ?>
                 <?= $block->getChildHtml('form_additional_info'); ?>
                 <div class="actions-toolbar">
                     <div class="primary"><button type="submit" class="action login primary" name="send" id="send2"><span><?php /* @escapeNotVerified */ echo __('Login') ?></span></button></div>
