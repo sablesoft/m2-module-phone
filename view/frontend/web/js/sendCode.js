@@ -4,10 +4,9 @@ define(["jquery", "SableSoft_Phone/js/jquery.mask"], function( $ ) {
         _create: function() {
             let options = this.options;
             let button = this.element;
-            let phone = jQuery('#email');
+            let phone = jQuery( options.selector );
             let numberLength = 9;
             let countryCode = options.countryCode;
-            phone.attr('placeholder', '+' + countryCode + ' (__) ___-__-__');
             phone.mask('+' + countryCode + ' (00) 000-00-00');
             button.on('click', function( e ) {
                 let disabled = button.attr('disabled');
