@@ -8,9 +8,9 @@ namespace SableSoft\Phone\Model\Config\Source;
  */
 class RegMode {
 
-    const MODE_ONLY_EMAIL = 0;
-    const MODE_ONLY_PHONE = 1;
-    const MODE_BOTH = 2;
+    const MODE_EMAIL = 0;
+    const MODE_PHONE = 1;
+    const MODE_CODE = 2;
 
     /**
      * Retrieve possible auth modes
@@ -19,9 +19,9 @@ class RegMode {
      */
     public function toOptionArray() :array {
         return [
-            self::MODE_ONLY_EMAIL   => __('Sign up via email only'),
-            self::MODE_ONLY_PHONE   => __('Sign up via phone only'),
-            self::MODE_BOTH         => __('Sign up via phone and email')
+            self::MODE_EMAIL   => __('Sign up via email'),
+            self::MODE_PHONE   => __('Sign up via phone'),
+            self::MODE_CODE    => __('Sign up by phone code')
         ];
     }
 }
