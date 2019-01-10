@@ -1,16 +1,17 @@
 <?php
 namespace SableSoft\Phone\Model;
 
-use Magento\Customer\Api\Data\CustomerInterface;
+// app use:
+use Magento\Customer\Model\Config\Share;
 use Magento\Customer\Model\AccountManagement as CustomerAccountManagement;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\EmailNotConfirmedException;
 use Magento\Framework\Exception\InvalidEmailOrPasswordException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Customer\Model\Config\Share;
+// module use:
 use SableSoft\Phone\Model\Config\Source\AuthMode;
-use SableSoft\Phone\Model\Phone;
 
 /**
  * Class AccountManagement
@@ -132,7 +133,7 @@ class AccountManagement extends CustomerAccountManagement {
      * @throws \Exception
      */
     public function authenticate( $username, $password ) {
-        $authMode = $this->config->getValue('auth');
+        $authMode = $this->config->getValue(Config::FIELD_AUTH_MODE );
         // find customer try:
         try {
             switch( $authMode ) {
@@ -246,6 +247,10 @@ class AccountManagement extends CustomerAccountManagement {
      */
     protected function _customerByPhone( string $phone ) {
         try {
+            // check is valid phone:
+            if( !$phone = $this->phone->setShort( $phone ) )
+                return false;
+
             $phoneAttribute = Config::ATTRIBUTE_PHONE;
             // add website filter:
             $websiteIdFilter = false;
@@ -259,7 +264,7 @@ class AccountManagement extends CustomerAccountManagement {
             $phoneFilter[] = $this->filterBuilder
                 ->setField( $phoneAttribute )
                 ->setConditionType('eq')
-                ->setValue( $this->phone->setShort( $phone ) )
+                ->setValue( $phone )
                 ->create();
             // Build search criteria
             $searchCriteriaBuilder = $this->searchCriteriaBuilder->addFilters( $phoneFilter );

@@ -1,6 +1,7 @@
 <?php
 namespace SableSoft\Phone\Setup;
 
+// app use:
 use Magento\Eav\Model\Config;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;

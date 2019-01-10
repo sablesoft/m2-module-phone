@@ -1,12 +1,14 @@
 <?php
 namespace SableSoft\Phone\Helper;
 
+// app use:
+use Magento\Eav\Model\Entity\Attribute;
+use Magento\Customer\Model\Customer;
+// module use:
 use SableSoft\Phone\Model\Config;
 use SableSoft\Phone\Model\Config\Source\AuthMode;
 use SableSoft\Phone\Model\Config\Source\RegMode;
 use SableSoft\Core\Helper\Data as CoreHelper;
-use Magento\Eav\Model\Entity\Attribute;
-use Magento\Customer\Model\Customer;
 
 /**
  * Class Data

@@ -1,7 +1,8 @@
 <?php
 namespace SableSoft\Phone\Model;
 
-use SableSoft\Smsp\Model\Config;
+// module use:
+use SableSoft\Smsp\Model\Config as SmspConfig;
 
 /**
  * Class Phone
@@ -9,8 +10,8 @@ use SableSoft\Smsp\Model\Config;
  * @package SableSoft\Phone\Model
  */
 class Phone {
-    /** @var Config  */
-    protected $config;
+    /** @var SmspConfig  */
+    protected $smspConfig;
     /** @var string */
     protected $number;
     /** @var string */
@@ -21,8 +22,8 @@ class Phone {
      *
      * @param Config $config
      */
-    public function __construct( Config $config ) {
-        $this->config = $config;
+    public function __construct( SmspConfig $config ) {
+        $this->smspConfig = $config;
     }
 
     /**
@@ -35,7 +36,7 @@ class Phone {
         $replacement = '${1}${2}${3}${4}';
         $number = preg_replace( $pattern, $replacement, $number );
         if( !is_numeric( $number ) )
-            return null;
+            return '';
 
         return $this->number = $number;
     }
@@ -92,6 +93,6 @@ class Phone {
             return $this->countryCode;
 
         return $this->countryCode =
-            $this->config->getValue( 'country' );
+            $this->smspConfig->getValue( SmspConfig::FIELD_COUNTRY );
     }
 }

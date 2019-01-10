@@ -1,10 +1,18 @@
 <?php
 namespace SableSoft\Phone\Block\Form;
 
+// app use:
+use Magento\Customer\Block\Form\Register as MagentoRegister;
+// module use:
+use SableSoft\Phone\Model\Config;
 use SableSoft\Phone\Helper\Data as PhoneHelper;
 use SableSoft\Phone\Model\Config\Source\RegMode;
-use Magento\Customer\Block\Form\Register as MagentoRegister;
 
+/**
+ * Class Register
+ *
+ * @package SableSoft\Phone\Block\Form
+ */
 class Register extends MagentoRegister {
 
     /** @var PhoneHelper  */
@@ -55,14 +63,14 @@ class Register extends MagentoRegister {
      */
     protected function _prepareLayout() {
         // update block template by registration mode:
-        switch( $this->phoneHelper->getConfigValue('auth' ) ) {
+        switch( $this->phoneHelper->getConfigValue( Config::FIELD_REG_MODE ) ) {
             case RegMode::MODE_CODE:
             case RegMode::MODE_PHONE:
                 $this->setTemplate('SableSoft_Phone::form/register.phtml');
                 break;
             default: break;
         };
+
         return parent::_prepareLayout();
     }
-
 }

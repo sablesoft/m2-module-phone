@@ -1,6 +1,7 @@
 <?php
 namespace SableSoft\Phone\Model;
 
+// module use:
 use SableSoft\Core\Model\Config as CoreConfig;
 
 /**

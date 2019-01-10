@@ -1,6 +1,7 @@
 <?php
 namespace SableSoft\Phone\Model;
 
+// app use:
 use Magento\Customer\Model\Session;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
