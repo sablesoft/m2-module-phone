@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <phone>
+            <general>
+                <phone_label>Phone</phone_label>
+                <auth>0</auth>
+                <reg>0</reg>
+                <code_length>4</code_length>
+                <code_message>Verify Code: %1</code_message>
+                <code_freeze>30</code_freeze>
+                <code_valid>120</code_valid>
+                <is_develop>0</is_develop>
+            </general>
+        </phone>
+    </default>
+</config>

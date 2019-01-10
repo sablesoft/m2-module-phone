@@ -1,0 +1,91 @@
+<?php
+// @codingStandardsIgnoreFile
+
+/** @var \Magento\Customer\Block\Form\Login $block */
+/** @var SableSoft\Phone\Helper\Data $helper */
+$helper = $this->helper('SableSoft\Phone\Helper\Data');
+$emailConfig = $helper->getEmailFieldConfig();
+$isCodeMode = $helper->isCodeAuthMode();
+$codeUrl = $helper->getCodeSendUrl();
+?>
+<?php
+/**
+ * Customer login form template
+ *
+ * @see \Magento\Customer\Block\Form\Login
+ * @var $block \Magento\Customer\Block\Form\Login
+ */
+try {
+?>
+<div class="block block-customer-login">
+    <div class="block-title">
+        <strong id="block-customer-login-heading" role="heading" aria-level="2"><?php /* @escapeNotVerified */ echo __('Registered Customers') ?></strong>
+    </div>
+    <div class="block-content" aria-labelledby="block-customer-login-heading">
+        <form class="form form-login"
+              action="<?php /* @escapeNotVerified */ echo $block->getPostActionUrl(); ?>"
+              method="post"
+              id="login-form"
+              data-mage-init='{"validation":{}}'>
+            <?= $block->getBlockHtml('formkey'); ?>
+            <fieldset class="fieldset login" data-hasrequired="<?php /* @escapeNotVerified */ echo __('* Required Fields') ?>">
+                <div class="field note"><?php /* @escapeNotVerified */ echo $helper->getLoginNote(); ?></div>
+                <div class="field email required">
+                    <label class="label" for="email"><span><?php /* @escapeNotVerified */ echo __($emailConfig['label']) ?></span></label>
+                    <div class="control">
+                        <input name="login[username]" value="<?= $block->escapeHtml($block->getUsername()) ?>" <?php if ($block->isAutocompleteDisabled()) :?> autocomplete="off"<?php endif; ?>
+                               id="email" type="<?php echo $emailConfig['type']?>" class="input-text"
+                               title="<?php /* @escapeNotVerified */ echo __($emailConfig['label']) ?>"
+                               data-validate="<?php echo $emailConfig['data_validate']?>">
+                    </div>
+                </div>
+            <?php if( $isCodeMode ) { ?>
+                <div class="field password required">
+                    <label for="pass" class="label" style="padding-top: 0;">
+                        <button type="button" class="btn btn-info" id="send_code">
+                            <?php /* @escapeNotVerified */ echo __('Send Code'); ?>
+                        </button>
+                    </label>
+                    <div class="control">
+                        <input name="login[password]" type="text"
+                               class="input-text" id="pass"
+                               title="<?php /* @escapeNotVerified */ echo __('Phone Code'); ?>"
+                               data-validate="{required:true}">
+                    </div>
+                </div>
+                <script type="text/x-magento-init">
+                    { "#send_code": {
+                        "SableSoft_Phone/js/sendCode": {
+                                "url":"<?= $codeUrl; ?>",
+                                "freezeTime"  : <?= $helper->getConfigValue('code_freeze' ) * 1000; ?>,
+                                "countryCode" : "<?= $helper->getConfigValue('country', 'smsp' ); ?>"
+                            }
+                        }
+                    }
+                </script>
+            <?php } else { ?>
+                <div class="field password required">
+                    <label for="pass" class="label">
+                        <span><?php /* @escapeNotVerified */ echo __('Password'); ?></span>
+                    </label>
+                    <div class="control">
+                        <input name="login[password]" type="password"
+                            <?php if ($block->isAutocompleteDisabled()) :?> autocomplete="off"<?php endif; ?>
+                               class="input-text" id="pass"
+                               title="<?php /* @escapeNotVerified */ echo __('Password') ?>"
+                               data-validate="{required:true, 'validate-password':true}">
+                    </div>
+                </div>
+            <?php } ?>
+                <?= $block->getChildHtml('form_additional_info'); ?>
+                <div class="actions-toolbar">
+                    <div class="primary"><button type="submit" class="action login primary" name="send" id="send2"><span><?php /* @escapeNotVerified */ echo __('Login') ?></span></button></div>
+                    <div class="secondary"><a class="action remind" href="<?php /* @escapeNotVerified */ echo $block->getForgotPasswordUrl() ?>"><span><?php /* @escapeNotVerified */ echo __('Forgot Your Password?') ?></span></a></div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<?php } catch( Exception $e ) {
+    $helper->log( 'error', $e->getMessage() );
+}
