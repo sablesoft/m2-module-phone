@@ -60,14 +60,14 @@ class Send extends SmspController {
                 'error'   => __('Code sending is freeze yet. Just wait.')
             ]);
         // generate new code:
-        if( !$code = $this->code->generate() )
+        if( !$this->code->generate() )
             return parent::response([
                 'success' => false,
                 'error'   => __('Generation code error.')
             ]);
         // set request params:
         $this->params = [
-            'message'       => $this->message( $code ),
+            'message'       => $this->code->getMessage(),
             'recipients'     => $this->number
         ];
         // make api request:
@@ -78,9 +78,5 @@ class Send extends SmspController {
         $this->command = self::SMSP_COMMAND;
         $number = $this->_request->getParam( self::PARAM_NUMBER );
         $this->number = $this->phone->setShort( $number );
-    }
-
-    protected function message( $code ) {
-        return $code; // @todo
     }
 }

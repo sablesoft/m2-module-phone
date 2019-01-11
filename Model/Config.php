@@ -14,10 +14,12 @@ class Config extends CoreConfig {
     const SECTION               = 'phone';
     const FIELD_REG_MODE        = 'reg';
     const FIELD_AUTH_MODE       = 'auth';
-    const FIELD_PHONE_LABEL     = 'phone_label';
+    const FIELD_CODE_MESSAGE    = 'code_message';
     const FIELD_CODE_FREEZE     = 'code_freeze';
     const FIELD_CODE_VALID      = 'code_valid';
     const FIELD_CODE_LENGTH     = 'code_length';
+
+    const DEFAULT_MAIL          = 'gmail.com';
 
     const ATTRIBUTE_PHONE   = self::SECTION;
 
@@ -29,10 +31,10 @@ class Config extends CoreConfig {
     /** @var array - settings keys */
     protected $keys = [
         // general settings:
-        self::FIELD_PHONE_LABEL     => self::GROUP_GENERAL,
         self::FIELD_REG_MODE        => self::GROUP_GENERAL,
         self::FIELD_AUTH_MODE       => self::GROUP_GENERAL,
         self::FIELD_CODE_FREEZE     => self::GROUP_GENERAL,
+        self::FIELD_CODE_MESSAGE    => self::GROUP_GENERAL,
         self::FIELD_CODE_VALID      => self::GROUP_GENERAL,
         self::FIELD_CODE_LENGTH     => self::GROUP_GENERAL,
         self::FIELD_DEVELOP         => self::GROUP_GENERAL

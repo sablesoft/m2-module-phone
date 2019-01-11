@@ -100,6 +100,18 @@ class Code {
     }
 
     /**
+     * @return string
+     */
+    public function getMessage() : string {
+        if( !$this->isReady() )
+            return '';
+
+        $template = $this->config->getValue( Config::FIELD_CODE_MESSAGE );
+
+        return __( $template, $this->value );
+    }
+
+    /**
      * @return bool
      */
     public function isExpired() : bool {
