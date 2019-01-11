@@ -5,6 +5,10 @@
                 type="SableSoft\Phone\Model\AccountManagement" />
     <preference for="Magento\Customer\Block\Form\Register"
                 type="SableSoft\Phone\Block\Form\Register"/>
+    <preference for="Magento\Customer\Block\Form\Edit"
+                type="SableSoft\Phone\Block\Form\Edit"/>
     <preference for="Magento\Customer\Controller\Account\CreatePost"
                 type="SableSoft\Phone\Model\Controller\AccountCreatePost"/>
+    <preference for="Magento\Customer\Controller\Account\EditPost"
+                type="SableSoft\Phone\Model\Controller\AccountEditPost"/>
 </config>
