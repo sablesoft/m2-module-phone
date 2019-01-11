@@ -45,14 +45,14 @@ class Register extends MagentoRegister {
         \Magento\Framework\Module\Manager $moduleManager,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Customer\Model\Url $customerUrl,
-        array $data = [],
+        $data = [],
         // update class construct params:
         PhoneHelper $helper
     ) {
         // parent construct:
         parent::__construct(
             $context, $directoryHelper, $jsonEncoder, $configCacheType, $regionCollectionFactory,
-            $countryCollectionFactory, $moduleManager, $customerSession, $customerUrl, $data
+            $countryCollectionFactory, $moduleManager, $customerSession, $customerUrl, (array) $data
         );
         // update construct:
         $this->phoneHelper = $helper;

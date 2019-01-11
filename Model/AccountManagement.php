@@ -5,13 +5,18 @@ namespace SableSoft\Phone\Model;
 use Magento\Customer\Model\Config\Share;
 use Magento\Customer\Model\AccountManagement as CustomerAccountManagement;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\EmailNotConfirmedException;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\InvalidEmailOrPasswordException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Customer\Model\Customer\CredentialsValidator;
 // module use:
 use SableSoft\Phone\Model\Config\Source\AuthMode;
+use SableSoft\Phone\Model\Config\Source\RegMode;
 
 /**
  * Class AccountManagement
@@ -30,6 +35,8 @@ class AccountManagement extends CustomerAccountManagement {
     private $customerFactory;
     /** @var \Magento\Framework\Event\ManagerInterface */
     private $eventManager;
+    /** @var CredentialsValidator */
+    private $credentialsValidator;
     /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
     /** @var FilterBuilder */
@@ -43,6 +50,8 @@ class AccountManagement extends CustomerAccountManagement {
     /** @var Code */
     protected $code;
 
+    /** @var bool */
+    public $isRegister;
     /**
      * AccountManagement constructor.
      *
@@ -74,6 +83,7 @@ class AccountManagement extends CustomerAccountManagement {
      * @param Config                                                       $config
      */
     public function __construct(
+        // parent constructor params:
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Framework\Event\ManagerInterface $eventManager,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
@@ -97,12 +107,15 @@ class AccountManagement extends CustomerAccountManagement {
         \Magento\Customer\Model\Customer $customerModel,
         \Magento\Framework\DataObjectFactory $objectFactory,
         \Magento\Framework\Api\ExtensibleDataObjectConverter $extensibleDataObjectConverter,
+        // update constructor params:
+        CredentialsValidator $credentialsValidator,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         FilterBuilder $filterBuilder,
         Config $config,
         Phone $phone,
         Code $code
     ) {
+        // parent construct:
         parent::__construct(
             $customerFactory, $eventManager, $storeManager,
             $mathRandom, $validator, $validationResultsDataFactory,
@@ -113,7 +126,9 @@ class AccountManagement extends CustomerAccountManagement {
             $dateTime, $customerModel, $objectFactory,
             $extensibleDataObjectConverter
         );
-
+        // update construct:
+        $this->credentialsValidator =
+            $credentialsValidator ?: ObjectManager::getInstance()->get( CredentialsValidator::class );
         $this->customerRepository = $customerRepository;
         $this->customerRegistry = $customerRegistry;
         $this->encryptor = $encryptor;
@@ -122,7 +137,6 @@ class AccountManagement extends CustomerAccountManagement {
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterBuilder = $filterBuilder;
         $this->storeManager = $storeManager;
-
         $this->config = $config;
         $this->phone = $phone;
         $this->code = $code;
@@ -133,52 +147,103 @@ class AccountManagement extends CustomerAccountManagement {
      * @throws \Exception
      */
     public function authenticate( $username, $password ) {
-        $authMode = $this->config->getValue(Config::FIELD_AUTH_MODE );
         // find customer try:
         try {
-            switch( $authMode ) {
-                case AuthMode::MODE_CODE:
-                case AuthMode::MODE_PHONE:
-                    $customer = $this->customerByPhone( $username );
-                    break;
-                case AuthMode::MODE_BOTH:
-                    $customer = $this->customerByPhoneOrEmail($username);
-                    break;
-                default:
-                    $customer = $this->customerByEmail($username);
-                    break;
-            }
+            $customer = $this->findCustomer( $username );
         } catch( NoSuchEntityException $e ) {
             throw new InvalidEmailOrPasswordException( __( 'Invalid login or password.' ) );
         }
-
         // password validate as phone code:
-        if( $authMode === AuthMode::MODE_CODE ) {
+        if( $this->isCodeMode() ) {
             if( !$this->code->validate( $password ) )
-                throw new InvalidEmailOrPasswordException(__('Invalid phone code.'));
+                throw new InvalidEmailOrPasswordException( __('Invalid phone code.') );
         // default password validate:
         } else {
             $this->checkPasswordStrength( $password );
             $hash = $this->customerRegistry
                 ->retrieveSecureData( $customer->getId() )->getPasswordHash();
-            if( !$this->encryptor->validateHash( $password, $hash ) ) {
+            if( !$this->encryptor->validateHash( $password, $hash ) )
                 throw new InvalidEmailOrPasswordException(__('Invalid login or password.'));
-            }
         }
-
+        // check confirmation:
         if( $customer->getConfirmation() &&
             $this->isConfirmationRequired( $customer ) )
-            throw new EmailNotConfirmedException(__('This account is not confirmed.'));
-
+            throw new EmailNotConfirmedException( __('This account is not confirmed.') );
+        // dispatch events:
         $customerModel = $this->customerFactory->create()->updateData( $customer );
         $this->eventManager->dispatch(
             'customer_customer_authenticated',
-            ['model' => $customerModel, 'password' => $password]
+            ['model' => $customerModel, 'password' => $password ]
         );
-
         $this->eventManager->dispatch(
             'customer_data_object_login', [ 'customer' => $customer ]
         );
+
+        return $customer;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createAccount(
+        CustomerInterface $customer, $password = null, $redirectUrl = ''
+    ) {
+        // get hash if password not null
+        // and not phone code registration mode:
+        if( !$this->isCodeRegMode() && $password !== null ) {
+            $this->checkPasswordStrength( $password );
+            $customerEmail = $customer->getEmail();
+            try {
+                $this->credentialsValidator->checkPasswordDifferentFromEmail($customerEmail, $password);
+            } catch (InputException $e) {
+                throw new LocalizedException(__('Password cannot be the same as email address.'));
+            }
+            $hash = $this->createPasswordHash( $password );
+        } else
+            $hash = null;
+
+        // prepare required attributes for phone code registration mode:
+        if( $this->isCodeRegMode() ) {
+            // transform phone number in short numeric format:
+            $attribute = $customer->getCustomAttribute( Config::ATTRIBUTE_PHONE );
+            $phone = $this->phone->setShort( $attribute->getValue() );
+            $customer->setCustomAttribute( Config::ATTRIBUTE_PHONE, $phone );
+            // set short phone format in required attributes if empty:
+            if( !$customer->getEmail() )
+                $customer->setEmail( "$phone@" . Config::DEFAULT_MAIL );
+            if( !$customer->getFirstname() )
+                $customer->setFirstname( $phone );
+            if( !$customer->getLastname() )
+                $customer->setLastname( $phone );
+        }
+
+        return $this->createAccountWithPasswordHash( $customer, $hash, $redirectUrl );
+    }
+
+    /**
+     * Send either confirmation or welcome email after an account creation
+     *
+     * @param CustomerInterface $customer
+     * @param string $redirectUrl
+     * @return void
+     */
+    protected function sendEmailConfirmation( CustomerInterface $customer, $redirectUrl ) {
+        // skip confirm sending if phone code registration mode:
+        if( !$this->isCodeRegMode() )
+            parent::sendEmailConfirmation( $customer, $redirectUrl );
+    }
+
+    /**
+     * @param string $username
+     * @throws NoSuchEntityException
+     */
+    protected function findCustomer( string $username ) {
+        if( $this->isCodeMode() ) {
+            $customer = $this->customerByPhone( $username );
+        } else if( !$this->isRegister && $this->isCodeAuthMode() ) {
+            $customer = $this->customerByPhoneOrEmail( $username );
+        } else
+            $customer = $this->customerByEmail( $username );
 
         return $customer;
     }
@@ -282,5 +347,27 @@ class AccountManagement extends CustomerAccountManagement {
         }
 
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCodeRegMode() : bool {
+        return RegMode::MODE_CODE == $this->config->getValue(Config::FIELD_REG_MODE );
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCodeAuthMode() : bool {
+        return AuthMode::MODE_CODE == $this->config->getValue(Config::FIELD_AUTH_MODE );
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCodeMode() : bool {
+        return  ( $this->isCodeAuthMode() && !$this->isRegister ) ||
+                ( $this->isCodeRegMode() && $this->isRegister );
     }
 }

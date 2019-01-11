@@ -102,7 +102,7 @@ try {
                         <input type="text" name="street[]"
                                value="<?= $block->escapeHtmlAttr($block->getFormData()->getStreet(0)) ?>"
                                title="<?= /* @noEscape */
-                               $block->getAttributeData()->getFrontendLabel('street') ?>" id="street_1"
+                               $block->getAttributeData()->getFrontendLabel('street'); ?>" id="street_1"
                                class="input-text <?= $block->escapeHtmlAttr($_streetValidationClass) ?>">
                         <div class="nested">
                             <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
@@ -203,8 +203,7 @@ try {
                            value="<?= $block->escapeHtmlAttr( $block->getFormData()->getPhone() ); ?>"
                            title="<?= $block->escapeHtmlAttr(__( $attribute->getData('frontend_label') ) ); ?>"
                            data-mage-init='{"mage/trim-input":{}}'
-                           class="input-text <?= $attribute->getData('frontend_class'); ?>"
-                           data-validate="{required:true}">
+                           class="input-text" data-validate="{required:true}">
                 </div>
             </div>
             <div class="field password required">

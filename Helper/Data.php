@@ -75,14 +75,14 @@ class Data extends CoreHelper {
      * @return bool
      */
     public function isCodeAuthMode() : bool {
-        return AuthMode::MODE_CODE == $this->getConfigValue('auth');
+        return AuthMode::MODE_CODE == $this->getConfigValue(Config::FIELD_AUTH_MODE );
     }
 
     /**
      * @return bool
      */
     public function isCodeRegMode() : bool {
-        return RegMode::MODE_CODE == $this->getConfigValue('reg');
+        return RegMode::MODE_CODE == $this->getConfigValue(Config::FIELD_REG_MODE );
     }
 
     /**
