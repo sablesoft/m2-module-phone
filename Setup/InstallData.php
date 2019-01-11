@@ -68,7 +68,7 @@ class InstallData implements InstallDataInterface {
                 'unique'                => true,
                 'sort_order'            => 10,
                 'visible'               => true,
-                'system'                => false,
+                'system'                => true,
                 'is_used_in_grid'       => true,
                 'is_visible_in_grid'    => true,
                 'is_filterable_in_grid' => true,
@@ -83,7 +83,10 @@ class InstallData implements InstallDataInterface {
             );
             $attribute->setData(
                 'used_in_forms', ['adminhtml_customer', 'customer_account_create', 'customer_account_edit' ]
-            )->setData('is_used_for_customer_segment', true );
+            )->setData('is_used_for_customer_segment', true )
+                ->setData('is_system', 1)
+                ->setData('is_user_defined', 0)
+                ->setData('is_visible', 1);
             $attribute->save();
         } catch ( \Exception $e ) {
             $this->logger->error( $e->getMessage() );
