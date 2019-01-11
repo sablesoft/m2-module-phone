@@ -311,42 +311,11 @@ class AccountManagement extends CustomerAccountManagement {
      * @return bool|CustomerInterface
      */
     protected function _customerByPhone( string $phone ) {
-        try {
-            // check is valid phone:
-            if( !$phone = $this->phone->setShort( $phone ) )
-                return false;
+        // check is valid phone:
+        if( !$this->phone->setShort( $phone ) )
+            return false;
 
-            $phoneAttribute = Config::ATTRIBUTE_PHONE;
-            // add website filter:
-            $websiteIdFilter = false;
-            if( $this->config->getCustomerAccountShareScope() == Share::SHARE_WEBSITE )
-                $websiteIdFilter[] = $this->filterBuilder
-                    ->setField('website_id')
-                    ->setConditionType('eq')
-                    ->setValue( $this->storeManager->getStore()->getWebsiteId() )
-                    ->create();
-            // Add phone filter:
-            $phoneFilter[] = $this->filterBuilder
-                ->setField( $phoneAttribute )
-                ->setConditionType('eq')
-                ->setValue( $phone )
-                ->create();
-            // Build search criteria
-            $searchCriteriaBuilder = $this->searchCriteriaBuilder->addFilters( $phoneFilter );
-            if( is_array( $websiteIdFilter ) )
-                $searchCriteriaBuilder->addFilters($websiteIdFilter);
-            $searchCriteria = $searchCriteriaBuilder->create();
-            // Retrieve the customer collection
-            // and return customer if there was exactly one customer found
-            $collection = $this->customerRepository->getList($searchCriteria);
-            if( $collection->getTotalCount() == 1 )
-                return $collection->getItems()[0];
-
-        } catch( \Exception $e ) {
-            $this->logger->error( $e->getMessage() );
-        }
-
-        return false;
+        return $this->phone->getCustomer();
     }
 
     /**
