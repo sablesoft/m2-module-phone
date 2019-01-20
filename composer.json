@@ -1,5 +1,5 @@
 {
-  "name": "sablesoft/phone",
+  "name": "sablesoft/magento2-phone",
   "description": "Phone func integration - login, registration, etc.",
   "require": {
     "php": ">=7.1.0",
